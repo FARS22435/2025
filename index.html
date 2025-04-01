@@ -1,136 +1,76 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>دردشة Firebase</title>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
-    <style>
-        body { font-family: Arial, sans-serif; text-align: center; direction: rtl; background-color: #f0f0f0; }
-        .container { max-width: 400px; margin: auto; padding: 20px; background: white; border-radius: 10px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); }
-        #chatBox { border: 1px solid #ccc; height: 300px; overflow-y: auto; padding: 10px; margin-top: 10px; background: #fff; border-radius: 5px; display: flex; flex-direction: column; }
-        .message { padding: 10px; margin: 5px; border-radius: 10px; max-width: 70%; word-wrap: break-word; }
-        .my-message { background: #dcf8c6; align-self: flex-end; text-align: right; }
-        .other-message { background: #fff; border: 1px solid #ddd; align-self: flex-start; text-align: left; }
-        .message-container { display: flex; flex-direction: column; }
-        .username { font-weight: bold; display: block; margin-bottom: 3px; }
-        .input-container { display: flex; margin-top: 10px; }
-        input { flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 5px; }
-        button { padding: 10px; border: none; background: #28a745; color: white; border-radius: 5px; cursor: pointer; margin-left: 5px; }
-        button:hover { background: #218838; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>نشر صورة أو فيديو</title>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-storage.js"></script>
 </head>
 <body>
-    <div class="container" id="loginScreen">
-        <h2>تسجيل الدخول</h2>
-        <input type="text" id="username" placeholder="أدخل اسمك">
-        <button onclick="login()">دخول</button>
-    </div>
 
-    <div class="container" id="chatScreen" style="display: none;">
-        <h2>الدردشة</h2>
-        <div id="chatBox" class="message-container"></div>
-        <div class="input-container">
-            <input type="text" id="message" placeholder="اكتب رسالة" onkeypress="if(event.key === 'Enter') sendMessage()">
-            <button onclick="sendMessage()">إرسال</button>
-            <button onclick="logout()" style="background: #dc3545;">خروج</button>
-        </div>
-    </div>
+  <h1>رفع صورة أو فيديو</h1>
 
-    <script>
-        // إعدادات Firebase
-        const firebaseConfig = {
-            apiKey: "YOUR_API_KEY",
-            authDomain: "YOUR_PROJECT.firebaseapp.com",
-            databaseURL: "https://YOUR_PROJECT.firebaseio.com",  // تأكد من أنك تستخدم URL الصحيح
-            projectId: "YOUR_PROJECT",
-            storageBucket: "YOUR_PROJECT.appspot.com",
-            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-            appId: "YOUR_APP_ID"
-        };
-        firebase.initializeApp(firebaseConfig);
-        const database = firebase.database();
+  <input type="file" id="fileInput">
+  <button onclick="uploadFile()">رفع</button>
 
-        // التحقق من حالة تسجيل الدخول
-        window.onload = function() {
-            let username = localStorage.getItem("username");
-            if (username) {
-                document.getElementById("loginScreen").style.display = "none";
-                document.getElementById("chatScreen").style.display = "block";
-                loadMessages();
-            }
-        };
+  <div id="mediaPreview"></div>
 
-        // تسجيل الدخول
-        function login() {
-            let username = document.getElementById("username").value;
-            if (username.trim() !== "") {
-                localStorage.setItem("username", username);
-                document.getElementById("loginScreen").style.display = "none";
-                document.getElementById("chatScreen").style.display = "block";
-                loadMessages();
-            } else {
-                alert("الرجاء إدخال اسم صحيح!");
-            }
-        }
+  <script>
+    // إعداد Firebase
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+      databaseURL: "https://fdfsssggesgesgesgeds-default-rtdb.firebaseio.com/",
+      projectId: "YOUR_PROJECT_ID",
+      storageBucket: "YOUR_PROJECT_ID.appspot.com",
+      messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+      appId: "YOUR_APP_ID"
+    };
 
-        // الخروج
-        function logout() {
-            localStorage.removeItem("username");
-            document.getElementById("chatScreen").style.display = "none";
-            document.getElementById("loginScreen").style.display = "block";
-        }
+    const app = firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+    const storage = firebase.storage();
 
-        // إرسال رسالة
-        function sendMessage() {
-            let messageBox = document.getElementById("message");
-            let messageText = messageBox.value.trim();
-            let username = localStorage.getItem("username");
+    function uploadFile() {
+      const fileInput = document.getElementById('fileInput');
+      const file = fileInput.files[0];
+      if (!file) {
+        alert("يرجى اختيار ملف");
+        return;
+      }
 
-            if (messageText !== "") {
-                let messageRef = database.ref("messages").push();  // إنشاء معرف فريد للرسالة
-                messageRef.set({
-                    username: username,
-                    text: messageText,
-                    timestamp: Date.now()
-                })
-                .then(function() {
-                    // إضافة الرسالة فورًا إلى واجهة المستخدم بعد إرسالها إلى Firebase
-                    addMessageToChat(username, messageText);
-                    messageBox.value = "";  // تفريغ حقل الرسالة بعد إرسالها
-                })
-                .catch(function(error) {
-                    console.error("Error writing message to database:", error);
-                });
-            }
-        }
+      // إنشاء مرجع لتحميل الملف إلى Firebase Storage
+      const storageRef = storage.ref('uploads/' + file.name);
 
-        // إضافة الرسالة إلى واجهة المستخدم
-        function addMessageToChat(username, text) {
-            let chatBox = document.getElementById("chatBox");
-            let messageDiv = document.createElement("div");
-            messageDiv.classList.add("message");
+      // تحميل الملف
+      const uploadTask = storageRef.put(file);
 
-            if (username === localStorage.getItem("username")) {
-                messageDiv.classList.add("my-message");
-            } else {
-                messageDiv.classList.add("other-message");
-            }
+      uploadTask.on('state_changed', (snapshot) => {
+        const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+        console.log('Progress: ' + progress + '%');
+      }, (error) => {
+        console.log('Error:', error);
+      }, () => {
+        uploadTask.snapshot.ref.getDownloadURL().then((downloadURL) => {
+          // نشر الرابط في قاعدة البيانات Firebase
+          const mediaRef = database.ref('media').push();
+          mediaRef.set({
+            url: downloadURL,
+            type: file.type
+          });
 
-            messageDiv.innerHTML = `<span class='username'>${username}:</span> ${text}`;
-            chatBox.appendChild(messageDiv);
-            chatBox.scrollTop = chatBox.scrollHeight;  // التمرير لأسفل لمشاهدة الرسالة الجديدة
-        }
+          // عرض المعاينة
+          const mediaPreview = document.getElementById('mediaPreview');
+          const mediaElement = document.createElement(file.type.startsWith('video') ? 'video' : 'img');
+          mediaElement.src = downloadURL;
+          mediaElement.controls = true;
+          mediaPreview.appendChild(mediaElement);
+        });
+      });
+    }
+  </script>
 
-        // تحميل الرسائل من قاعدة البيانات
-        function loadMessages() {
-            let chatBox = document.getElementById("chatBox");
-            database.ref("messages").on("child_added", function(snapshot) {
-                let messageData = snapshot.val();
-                addMessageToChat(messageData.username, messageData.text);  // إضافة الرسالة إلى الواجهة
-            });
-        }
-    </script>
 </body>
 </html>
