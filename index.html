@@ -59,7 +59,7 @@
                 localStorage.setItem("username", username);
                 document.getElementById("loginScreen").style.display = "none";
                 document.getElementById("chatScreen").style.display = "block";
-                loadMessages();
+                loadMessages();  // تحميل الرسائل من Firebase
             } else {
                 alert("الرجاء إدخال اسم صحيح!");
             }
