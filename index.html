@@ -96,6 +96,8 @@
                     timestamp: Date.now()
                 })
                 .then(function() {
+                    // إضافة الرسالة فورًا إلى واجهة المستخدم بعد إرسالها إلى Firebase
+                    addMessageToChat(username, messageText);
                     messageBox.value = "";  // تفريغ حقل الرسالة بعد إرسالها
                 })
                 .catch(function(error) {
