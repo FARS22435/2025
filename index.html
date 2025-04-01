@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>دردشة بسيطة</title>
+    <title>دردشة Firebase</title>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
     <style>
@@ -52,6 +52,7 @@
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
+        // تسجيل الدخول
         function login() {
             let username = document.getElementById("username").value;
             if (username.trim() !== "") {
@@ -64,12 +65,14 @@
             }
         }
 
+        // الخروج من الجلسة
         function logout() {
             localStorage.removeItem("username");
             document.getElementById("chatScreen").style.display = "none";
             document.getElementById("loginScreen").style.display = "block";
         }
 
+        // إرسال رسالة
         function sendMessage() {
             let messageBox = document.getElementById("message");
             let messageText = messageBox.value.trim();
@@ -91,6 +94,7 @@
             }
         }
 
+        // إضافة الرسائل إلى الشاشة
         function addMessageToChat(username, text) {
             let chatBox = document.getElementById("chatBox");
             let messageDiv = document.createElement("div");
@@ -107,6 +111,7 @@
             chatBox.scrollTop = chatBox.scrollHeight; // التمرير التلقائي للأسفل
         }
 
+        // تحميل الرسائل
         function loadMessages() {
             let chatBox = document.getElementById("chatBox");
             database.ref("messages").on("child_added", function(snapshot) {
