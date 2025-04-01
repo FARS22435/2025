@@ -43,7 +43,7 @@
         const firebaseConfig = {
             apiKey: "YOUR_API_KEY",
             authDomain: "YOUR_PROJECT.firebaseapp.com",
-            databaseURL: "https://fdfsssggesgesgesgeds-default-rtdb.firebaseio.com/",
+            databaseURL: "https://YOUR_PROJECT.firebaseio.com",  // تأكد من أنك تستخدم URL الصحيح
             projectId: "YOUR_PROJECT",
             storageBucket: "YOUR_PROJECT.appspot.com",
             messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
@@ -51,6 +51,16 @@
         };
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
+
+        // التحقق من حالة تسجيل الدخول
+        window.onload = function() {
+            let username = localStorage.getItem("username");
+            if (username) {
+                document.getElementById("loginScreen").style.display = "none";
+                document.getElementById("chatScreen").style.display = "block";
+                loadMessages();
+            }
+        };
 
         // تسجيل الدخول
         function login() {
