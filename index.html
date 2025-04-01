@@ -39,10 +39,11 @@
     </div>
 
     <script>
+        // إعداد Firebase
         const firebaseConfig = {
             apiKey: "YOUR_API_KEY",
             authDomain: "YOUR_PROJECT.firebaseapp.com",
-            databaseURL: "https://YOUR_PROJECT.firebaseio.com",
+            databaseURL: "https://fdfsssggesgesgesgeds-default-rtdb.firebaseio.com/",  // رابط قاعدة البيانات
             projectId: "YOUR_PROJECT",
             storageBucket: "YOUR_PROJECT.appspot.com",
             messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
@@ -73,16 +74,20 @@
             let messageBox = document.getElementById("message");
             let messageText = messageBox.value.trim();
             let username = localStorage.getItem("username");
-            
+
             if (messageText !== "") {
                 let messageRef = database.ref("messages").push();
                 messageRef.set({
                     username: username,
                     text: messageText,
                     timestamp: Date.now()
+                })
+                .then(function() {
+                    messageBox.value = ""; // تفريغ حقل الرسالة بعد الإرسال
+                })
+                .catch(function(error) {
+                    console.error("Error writing message to database:", error);
                 });
-                
-                messageBox.value = "";
             }
         }
 
@@ -90,16 +95,16 @@
             let chatBox = document.getElementById("chatBox");
             let messageDiv = document.createElement("div");
             messageDiv.classList.add("message");
-            
+
             if (username === localStorage.getItem("username")) {
                 messageDiv.classList.add("my-message");
             } else {
                 messageDiv.classList.add("other-message");
             }
-            
+
             messageDiv.innerHTML = `<span class='username'>${username}:</span> ${text}`;
             chatBox.appendChild(messageDiv);
-            chatBox.scrollTop = chatBox.scrollHeight;
+            chatBox.scrollTop = chatBox.scrollHeight; // التمرير التلقائي للأسفل
         }
 
         function loadMessages() {
