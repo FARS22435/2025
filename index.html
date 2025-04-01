@@ -39,11 +39,11 @@
     </div>
 
     <script>
-        // إعداد Firebase
+        // إعدادات Firebase
         const firebaseConfig = {
             apiKey: "YOUR_API_KEY",
             authDomain: "YOUR_PROJECT.firebaseapp.com",
-            databaseURL: "https://fdfsssggesgesgesgeds-default-rtdb.firebaseio.com/",  // رابط قاعدة البيانات
+            databaseURL: "https://fdfsssggesgesgesgeds-default-rtdb.firebaseio.com/",
             projectId: "YOUR_PROJECT",
             storageBucket: "YOUR_PROJECT.appspot.com",
             messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
@@ -59,13 +59,13 @@
                 localStorage.setItem("username", username);
                 document.getElementById("loginScreen").style.display = "none";
                 document.getElementById("chatScreen").style.display = "block";
-                loadMessages();  // تحميل الرسائل من Firebase
+                loadMessages();
             } else {
                 alert("الرجاء إدخال اسم صحيح!");
             }
         }
 
-        // الخروج من الجلسة
+        // الخروج
         function logout() {
             localStorage.removeItem("username");
             document.getElementById("chatScreen").style.display = "none";
@@ -79,14 +79,14 @@
             let username = localStorage.getItem("username");
 
             if (messageText !== "") {
-                let messageRef = database.ref("messages").push();
+                let messageRef = database.ref("messages").push();  // إنشاء معرف فريد للرسالة
                 messageRef.set({
                     username: username,
                     text: messageText,
                     timestamp: Date.now()
                 })
                 .then(function() {
-                    messageBox.value = ""; // تفريغ حقل الرسالة بعد الإرسال
+                    messageBox.value = "";  // تفريغ حقل الرسالة بعد إرسالها
                 })
                 .catch(function(error) {
                     console.error("Error writing message to database:", error);
@@ -94,7 +94,7 @@
             }
         }
 
-        // إضافة الرسائل إلى الشاشة
+        // إضافة الرسالة إلى واجهة المستخدم
         function addMessageToChat(username, text) {
             let chatBox = document.getElementById("chatBox");
             let messageDiv = document.createElement("div");
@@ -108,15 +108,15 @@
 
             messageDiv.innerHTML = `<span class='username'>${username}:</span> ${text}`;
             chatBox.appendChild(messageDiv);
-            chatBox.scrollTop = chatBox.scrollHeight; // التمرير التلقائي للأسفل
+            chatBox.scrollTop = chatBox.scrollHeight;  // التمرير لأسفل لمشاهدة الرسالة الجديدة
         }
 
-        // تحميل الرسائل
+        // تحميل الرسائل من قاعدة البيانات
         function loadMessages() {
             let chatBox = document.getElementById("chatBox");
             database.ref("messages").on("child_added", function(snapshot) {
                 let messageData = snapshot.val();
-                addMessageToChat(messageData.username, messageData.text);
+                addMessageToChat(messageData.username, messageData.text);  // إضافة الرسالة إلى الواجهة
             });
         }
     </script>
